@@ -1,0 +1,121 @@
+/*
+    Code written by Mohammad Yasser Khan - June 10, 2018 
+    Language used: C#
+    
+    Problem: In English, we have a concept called root, which can be followed by some other words to form another longer word - 
+    let's call this word successor. For example, the root an, followed by other, which can form another word another. 
+    Now, given a dictionary consisting of many roots and a sentence. You need to replace all the successor in the sentence 
+    with the root forming it. If a successor has many roots can form it, replace it with the root with the shortest length. 
+*/
+
+public class Solution {
+    
+    public class TrieNode
+    {
+        public Dictionary<char, TrieNode> Children { get; set; } = new Dictionary<char, TrieNode>();
+        public bool IsWord { get; set; } = false;
+    }
+    
+    TrieNode root = new TrieNode();
+    
+    public string ReplaceWords(IList<string> dict, string sentence) 
+    {
+        if ((sentence == null) || (sentence.Length == 0) || (dict.Count == 0))
+        {
+            return sentence;
+        }
+        
+        foreach(string word in dict)
+        {
+            AddWordToTrie(word);
+        }
+        
+        string[] wordsInSentence = sentence.Split(' ');
+        int wordCount = wordsInSentence.Length;
+        
+        if (wordCount == 0)
+        {
+            return sentence;
+        }
+        
+        StringBuilder output = new StringBuilder();
+        
+        for (int i = 0; i < wordCount; i++)
+        {
+            string prefix = FindRootPrefixFromTrie(wordsInSentence[i]);
+            
+            if (prefix != null)
+            {
+                output.Append(prefix);
+            }
+            else
+            {
+                output.Append(wordsInSentence[i]);
+            }
+            
+            if (i != (wordCount - 1))
+            {
+                output.Append(' ');
+            }
+        }
+        
+        return output.ToString();        
+    }
+    
+    private string FindRootPrefixFromTrie(string word) 
+    {
+        if ((word == null) || (word.Length == 0))
+        {
+            return word;
+        }
+            
+        TrieNode current = root;
+        int wordLength = word.Length;
+        StringBuilder prefix = new StringBuilder();
+        
+        for (int i = 0;  i < wordLength; i++)
+        {   
+            prefix.Append(word[i], 1);
+            if (!current.Children.ContainsKey(word[i]))
+            {
+                return null;
+            }
+            else
+            {
+                current = current.Children[word[i]];
+                if (current.IsWord)
+                {
+                    return prefix.ToString();
+                }                
+            }
+        }
+            
+        return null; 
+    }
+    
+    private void AddWordToTrie(string word)
+    {
+        if ((word == null) || (word.Length == 0))
+        {
+            return;
+        }
+        
+        TrieNode current = root;
+        int wordLength = word.Length;
+        
+        for (int i = 0;  i < wordLength; i++)
+        {
+            if (!current.Children.ContainsKey(word[i]))
+            {
+                current.Children.Add(word[i], new TrieNode());
+            }
+            
+            current = current.Children[word[i]];
+            
+            if (i == (wordLength - 1))
+            {
+                current.IsWord = true;
+            }
+        }        
+    }
+}
